@@ -1,24 +1,29 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import React from 'react'
+import { Stack } from 'expo-router'
+import { useFonts } from "expo-font";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
 
+    const [fontsloaded] = useFonts({
+        "outfitBold": require("../assets/fonts/Outfit-Bold.ttf"),
+        "outfitMedium": require("../assets/fonts/Outfit-Medium.ttf"),
+        "outfitRegular":require("../assets/fonts/Outfit-Regular.ttf"),
+        "outfitSemiBold":require("../assets/fonts/Outfit-SemiBold.ttf"),
+        "outfitThin":require("../assets/fonts/Outfit-Thin.ttf"),
+        "outfitExtraLight":require("../assets/fonts/Outfit-ExtraLight.ttf"),
+        "outfitExtraBold":require("../assets/fonts/Outfit-ExtraBold.ttf")
+    });
+
+    if(!fontsloaded){
+        return null;
+    }
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+    <Stack screenOptions={{headerShown:false}}>
+        <Stack.Screen name="(tabs)"></Stack.Screen>
+        <Stack.Screen name="index"></Stack.Screen>
+        <Stack.Screen name="diagnosisResult"></Stack.Screen>
+        <Stack.Screen name="auth"></Stack.Screen>
+        <Stack.Screen name="AllCommonHealthTips"></Stack.Screen>
+    </Stack>
+  )
 }
