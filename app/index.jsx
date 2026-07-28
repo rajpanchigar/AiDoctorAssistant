@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 25,
     height: 58,
-    borderRadius: 18,
+    borderRadius: 30,
     backgroundColor: "#2B7FFF",
     flexDirection: "row",
     justifyContent: "center",

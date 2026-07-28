@@ -124,16 +124,17 @@ export default function Home() {
         <View style={styles.recent}>
           <View style={styles.recentHeader}>
             <Text style={styles.commonText}>Recent Diagnoses</Text>
+            <TouchableOpacity onPress={()=> router.push('/profile')}>
+              <Text style={styles.viewAll}>View All</Text>
 
-            <TouchableOpacity>
-              <Text style={styles.viewAll}>View all</Text>
             </TouchableOpacity>
+
           </View>
 
-          {diagonses.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.diagnosisCard} onPress={()=> router.push({
+          {diagonses.slice(0, 1).map((item) => (
+            <TouchableOpacity key={item.id} style={styles.diagnosisCard} onPress={() => router.push({
               pathname: '/CurrentDiagnosisDetails',
-              params:{
+              params: {
                 id: item.id
               }
             })}>
@@ -331,74 +332,80 @@ const styles = StyleSheet.create({
     fontFamily: "outfitSemiBold",
     color: "#3B82F6",
   },
+  viewAll:{
+    fontSize: 16,
+    fontFamily: "outfitSemiBold",
+    color: "#3B82F6",
+
+  },
 
   recent: {
-  marginHorizontal: 20,
-  marginTop: 25,
-},
-
-recentHeader: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: 15,
-},
-
-commonText: {
-  fontSize: 24,
-  fontFamily: "outfitBold",
-  color: "#111827",
-},
-
-viewAll: {
-  color: "#3B82F6",
-  fontSize: 16,
-  fontFamily: "outfitSemiBold",
-},
-
-diagnosisCard: {
-  flexDirection: "row",
-  alignItems: "center",
-  backgroundColor: "#FFFFFF",
-  borderRadius: 20,
-  padding: 16,
-  marginBottom: 14,
-
-  shadowColor: "#000",
-  shadowOffset: {
-    width: 0,
-    height: 2,
+    marginHorizontal: 20,
+    marginTop: 25,
   },
-  shadowOpacity: 0.08,
-  shadowRadius: 8,
 
-  elevation: 4,
-},
+  recentHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
 
-iconBox: {
-  width: 56,
-  height: 56,
-  borderRadius: 16,
-  backgroundColor: "#EEF4FF",
-  justifyContent: "center",
-  alignItems: "center",
-},
+  commonText: {
+    fontSize: 24,
+    fontFamily: "outfitBold",
+    color: "#111827",
+  },
 
-cardContent: {
-  flex: 1,
-  marginLeft: 16,
-},
+  viewAll: {
+    color: "#3B82F6",
+    fontSize: 16,
+    fontFamily: "outfitSemiBold",
+  },
 
-diseaseName: {
-  fontSize: 17,
-  color: "#111827",
-  fontFamily: "outfitBold",
-},
+  diagnosisCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 14,
 
-dateText: {
-  marginTop: 4,
-  fontSize: 15,
-  color: "#6B7280",
-  fontFamily: "outfitRegular",
-},
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+
+    elevation: 4,
+  },
+
+  iconBox: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: "#EEF4FF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  cardContent: {
+    flex: 1,
+    marginLeft: 16,
+  },
+
+  diseaseName: {
+    fontSize: 17,
+    color: "#111827",
+    fontFamily: "outfitBold",
+  },
+
+  dateText: {
+    marginTop: 4,
+    fontSize: 15,
+    color: "#6B7280",
+    fontFamily: "outfitRegular",
+  },
 });
