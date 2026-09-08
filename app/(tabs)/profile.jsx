@@ -18,54 +18,78 @@ import {
     where,
     getDocs,
 } from "firebase/firestore";
+import { auth } from "../../configs/FirebaseConfigs";
 
 export default function Profile() {
     const [user, setUser] = useState(null);
     const [diagonses, setDiagonses] = useState([]);
     const router = useRouter();
 
+
     useEffect(() => {
         const getUser = async () => {
             try {
+                // Get Firebase authenticated user
+                const firebaseUser = auth.currentUser;
+
+                console.log("Firebase User:", firebaseUser);
+                console.log("Firebase UID:", firebaseUser?.uid);
+
+                if (!firebaseUser) {
+                    console.log("No Firebase user logged in");
+                    router.replace("/");
+                    return;
+                }
+
+                // Get local user information for displaying name/email
                 const data = await AsyncStorage.getItem("user");
 
                 if (data) {
                     const currentUser = JSON.parse(data);
-
                     setUser(currentUser);
-
-                    console.log("Current User:", currentUser);
-                    console.log("User UID:", currentUser.uid);
-
-                    const q = query(
-                        collection(db, "user_diagnoses"),
-                        where("userId", "==", currentUser.uid)
-                    );
-
-                    const result = await getDocs(q);
-
-                    const diagnosisList = [];
-
-                    result.forEach((doc) => {
-                        diagnosisList.push({
-                            id: doc.id,
-                            ...doc.data(),
-                        });
-                    });
-
-                    setDiagonses(diagnosisList);
-
-                    console.log("Diagnosis List:", diagnosisList);
                 } else {
-                    router.replace("/");
+                    setUser({
+                        uid: firebaseUser.uid,
+                        email: firebaseUser.email,
+                        fullName: firebaseUser.displayName || "",
+                    });
                 }
+
+                // Get all diagnoses belonging to this Firebase user
+                const q = query(
+                    collection(db, "user_diagnoses"),
+                    where("userId", "==", firebaseUser.uid)
+                );
+
+                const result = await getDocs(q);
+
+                const diagnosisList = result.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+
+                // Sort newest diagnosis first
+                diagnosisList.sort((a, b) => {
+                    const dateA = a.createdAt?.toDate?.() || new Date(0);
+                    const dateB = b.createdAt?.toDate?.() || new Date(0);
+
+                    return dateB - dateA;
+                });
+
+                setDiagonses(diagnosisList);
+
+                console.log("Total Diagnoses:", diagnosisList.length);
+                console.log("Diagnosis List:", diagnosisList);
+
             } catch (error) {
-                console.log("Error:", error);
+                console.error("Error fetching diagnoses:", error);
             }
         };
 
         getUser();
     }, []);
+
+
 
 
     const handleLogout = () => {
@@ -153,42 +177,67 @@ export default function Profile() {
                         <Text style={styles.commonText}>All Diagnoses</Text>
                     </View>
 
-                    {diagonses.map((item) => (
-                        <TouchableOpacity key={item.id} style={styles.diagnosisCard} onPress={() => router.push({
-                            pathname: '/CurrentDiagnosisDetails',
-                            params: {
-                                id: item.id
-                            }
-                        })}>
-                            <View style={styles.iconBox}>
+                    {diagonses.length > 0 ? (
+                        diagonses.map((item) => (
+                            <TouchableOpacity
+                                key={item.id}
+                                style={styles.diagnosisCard}
+                                onPress={() =>
+                                    router.push({
+                                        pathname: "/CurrentDiagnosisDetails",
+                                        params: {
+                                            id: item.id.toString(),
+
+                                        },
+                                    })
+                                }
+                            >
+                                <View style={styles.iconBox}>
+                                    <MaterialCommunityIcons
+                                        name="stethoscope"
+                                        size={26}
+                                        color="#3B82F6"
+                                    />
+                                </View>
+
+                                <View style={styles.cardContent}>
+                                    <Text style={styles.diseaseName}>
+                                        {item?.diagnosis?.suspectedDisease || "Unknown Diagnosis"}
+                                    </Text>
+
+                                    <Text style={styles.dateText}>
+                                        {item?.createdAt?.toDate
+                                            ? item.createdAt.toDate().toLocaleDateString("en-US", {
+                                                month: "short",
+                                                day: "numeric",
+                                                year: "numeric",
+                                            })
+                                            : "Date unavailable"}
+                                    </Text>
+                                </View>
+
                                 <MaterialCommunityIcons
-                                    name="stethoscope"
-                                    size={26}
-                                    color="#3B82F6"
+                                    name="chevron-right"
+                                    size={28}
+                                    color="#9CA3AF"
                                 />
-                            </View>
+                            </TouchableOpacity>
+                        ))
+                    ) : (
+                        <Text
+                            style={{
+                                textAlign: "center",
+                                color: "#6B7280",
+                                fontFamily: "outfitRegular",
+                                fontSize: 15,
+                                marginTop: 20,
+                            }}
+                        >
+                            No diagnoses found.
+                        </Text>
+                    )}
 
-                            <View style={styles.cardContent}>
-                                <Text style={styles.diseaseName}>
-                                    {item?.diagnosis?.diagnosisTitle}
-                                </Text>
 
-                                <Text style={styles.dateText}>
-                                    {item.createdAt?.toDate().toLocaleDateString("en-US", {
-                                        month: "short",
-                                        day: "numeric",
-                                        year: "numeric",
-                                    })}
-                                </Text>
-                            </View>
-
-                            <MaterialCommunityIcons
-                                name="chevron-right"
-                                size={28}
-                                color="#9CA3AF"
-                            />
-                        </TouchableOpacity>
-                    ))}
                 </View>
 
             </ScrollView>

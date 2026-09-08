@@ -141,45 +141,60 @@ export default function DiagnosisResultScreen() {
   };
 
   const handleSave = async () => {
-    if (!result) return;
-    setSaving(true);
-    try {
-      const activeUid = user?.uid || auth.currentUser?.uid;
-      if (!activeUid) {
-        Alert.alert("Authentication Required", "Please sign in to save your results.");
-        setSaving(false);
-        return;
-      }
+  if (!result) return;
 
-      // Save to Firebase Firestore collection 'user_diagnoses'
-      await addDoc(collection(db, "user_diagnoses"), {
-        userId: activeUid,
-        userEmail: user?.email || auth.currentUser?.email || "",
-        diagnosis: result,
-        createdAt: serverTimestamp(),
-      });
+  setSaving(true);
 
-      setSaved(true);
-      if (Platform.OS === 'android') {
-        ToastAndroid.show("Diagnosis saved to your profile!", ToastAndroid.SHORT);
-      } else {
-        Alert.alert("Saved", "Diagnosis saved to your profile successfully!");
-      }
-    } catch (error) {
-      console.error("Error saving to Firestore:", error);
-      const errMsg = error?.message || String(error);
-      if (errMsg.includes("not found") || errMsg.includes("Database") || errMsg.includes("configuration")) {
-        Alert.alert(
-          "Firestore Setup Required",
-          "Cloud Firestore is not created in your Firebase Console yet.\n\nTo activate it:\n1. Go to console.firebase.google.com\n2. Select project 'testproject-3f19a'\n3. Click 'Firestore Database' in the sidebar\n4. Click 'Create Database' and choose Start in Test Mode."
-        );
-      } else {
-        Alert.alert("Save Failed", "Failed to save diagnosis. Please check your network and try again.");
-      }
-    } finally {
-      setSaving(false);
+  try {
+    // IMPORTANT:
+    // Firestore Security Rules use Firebase Authentication.
+    // Do not use only AsyncStorage user data for authentication.
+    const firebaseUser = auth.currentUser;
+
+    console.log("Firebase Auth User:", firebaseUser);
+    console.log("Firebase UID:", firebaseUser?.uid);
+
+    if (!firebaseUser) {
+      Alert.alert(
+        "Authentication Required",
+        "Your Firebase login session has expired. Please log in again."
+      );
+      return;
     }
-  };
+
+    await addDoc(collection(db, "user_diagnoses"), {
+      userId: firebaseUser.uid,
+      userEmail: firebaseUser.email || "",
+      diagnosis: result,
+      createdAt: serverTimestamp(),
+    });
+
+    setSaved(true);
+
+    if (Platform.OS === "android") {
+      ToastAndroid.show(
+        "Diagnosis saved to your profile!",
+        ToastAndroid.SHORT
+      );
+    } else {
+      Alert.alert(
+        "Saved",
+        "Diagnosis saved to your profile successfully!"
+      );
+    }
+
+  } catch (error) {
+    console.error("Error saving to Firestore:", error);
+
+    Alert.alert(
+      "Save Failed",
+      error?.message || "Failed to save diagnosis."
+    );
+  } finally {
+    setSaving(false);
+  }
+};
+
 
   if (loading) {
     return (

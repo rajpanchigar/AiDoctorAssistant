@@ -41,7 +41,11 @@ export default function DiagnosisScreen() {
       const data = await analyzeSymptoms(symptom.trim());
       // Store result in AsyncStorage then navigate
       await AsyncStorage.setItem("diagnosisResult", JSON.stringify(data));
+      
+
       router.push("/diagnosisResult");
+      setSymptom("")
+
     } catch (err) {
       console.error(err);
       Alert.alert(

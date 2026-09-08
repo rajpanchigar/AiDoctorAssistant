@@ -131,7 +131,7 @@ export default function Home() {
 
           </View>
 
-          {diagonses.slice(0, 1).map((item) => (
+          {diagonses.slice(0,2).map((item) => (
             <TouchableOpacity key={item.id} style={styles.diagnosisCard} onPress={() => router.push({
               pathname: '/CurrentDiagnosisDetails',
               params: {
