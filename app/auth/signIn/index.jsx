@@ -5,6 +5,9 @@ import {
   TextInput,
   TouchableOpacity,
   ToastAndroid,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView
 } from "react-native";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,37 +22,37 @@ export default function SignIn() {
 
   const router = useRouter();
 
-  const SignIn = async() => {
+  const SignIn = async () => {
 
-    if(!email || !password){
-      ToastAndroid.show("All Fields Are Required",ToastAndroid.BOTTOM);
+    if (!email || !password) {
+      ToastAndroid.show("All Fields Are Required", ToastAndroid.BOTTOM);
       return;
     }
 
-    try{
+    try {
 
-      const userCredential = await signInWithEmailAndPassword(auth,email,password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
       const user = userCredential.user;
 
       await user.reload();
 
 
-      await AsyncStorage.setItem("user",JSON.stringify({
+      await AsyncStorage.setItem("user", JSON.stringify({
         uid: user.uid,
         email: user.email,
         fullName: user.displayName,
-        
+
       }));
 
       router.push('/(tabs)/home');
 
 
-    }catch(error){
+    } catch (error) {
       console.log(error);
 
     }
-    
+
 
 
   }
@@ -62,150 +65,168 @@ export default function SignIn() {
         paddingTop: 50,
       }}
     >
-      {/* Logo */}
-      <View style={{ alignItems: "center" }}>
-        <View
-          style={{
-            width: 80,
-            height: 80,
-            backgroundColor: "#2b7fff",
-            borderRadius: 20,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ fontSize: 40 }}>🩺</Text>
-        </View>
-
-        <Text
-          style={{
-            fontSize: 28,
-            marginTop: 20,
-            fontFamily:"outfitBold"
-          }}
-        >
-          Welcome Back
-        </Text>
-
-        <Text
-          style={{
-            color: "gray",
-            textAlign: "center",
-            marginTop: 8,
-            fontFamily:"outfitSemiBold",
-            fontSize: 19
-          }}
-        >
-          Sign In To Your AI Doctor Assistant account
-        </Text>
-      </View>
-
-      {/* Email */}
-      <View style={{ marginTop: 40 }}>
-        <Text
-          style={{
-            marginBottom: 8,
-            fontFamily:"outfitBold",
-            fontSize: 17,
-
-          }}
-        >
-          Email
-        </Text>
-
-        <TextInput
-          placeholder="you@example.com"
-          keyboardType="email-address"
-          style={{
-            borderWidth: 1,
-            borderColor: "#ddd",
-            borderRadius: 20,
-            padding: 15,
-          }}
-
-          onChangeText={(value) => setEmail(value)}
-        />
-      </View>
-
-      {/* Password */}
-      <View style={{ marginTop: 20 }}>
-        <Text
-          style={{
-            marginBottom: 8,
-            fontFamily:"outfitBold",
-            fontSize: 17,
-          }}
-        >
-          Password
-        </Text>
-
-        <TextInput
-          placeholder="Enter your password"
-          secureTextEntry
-          style={{
-            borderWidth: 1,
-            borderColor: "#ddd",
-            borderRadius: 20,
-            padding: 15,
-          }}
-          onChangeText={(value) => setPassword(value)}
-        />
-      </View>
-
-      {/* Sign In Button */}
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#2b7fff",
-          padding: 16,
-          borderRadius: 50,
-          marginTop: 30,
-          alignItems: "center",
-
-        }}
-
-        onPress={SignIn}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
-        <Text
-          style={{
-            color: "#fff",
-            fontSize: 20,
-            fontFamily:"outfitExtraBold"
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingHorizontal: 25,
+            paddingTop: 50,
           }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          Sign In
-        </Text>
-      </TouchableOpacity>
+          {/* Logo */}
+          <View style={{ alignItems: "center" }}>
+            <View
+              style={{
+                width: 80,
+                height: 80,
+                backgroundColor: "#2b7fff",
+                borderRadius: 20,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 40 }}>🩺</Text>
+            </View>
 
-      {/* Divider */}
-      
-        
+            <Text
+              style={{
+                fontSize: 28,
+                marginTop: 20,
+                fontFamily: "outfitBold"
+              }}
+            >
+              Welcome Back
+            </Text>
 
-      {/* Bottom */}
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          marginTop: "auto",
-          marginBottom: 20,
-        }}
-      >
-        <Text style={{ color: "gray",fontFamily:"outfitBold",fontSize: 18 }}>
-          Don't have an account?
-        </Text>
+            <Text
+              style={{
+                color: "gray",
+                textAlign: "center",
+                marginTop: 8,
+                fontFamily: "outfitSemiBold",
+                fontSize: 19
+              }}
+            >
+              Sign In To Your AI Doctor Assistant account
+            </Text>
+          </View>
 
-        <TouchableOpacity onPress={()=> router.push('/auth/signUp')}>
-          <Text
+          {/* Email */}
+          <View style={{ marginTop: 40 }}>
+            <Text
+              style={{
+                marginBottom: 8,
+                fontFamily: "outfitBold",
+                fontSize: 17,
+
+              }}
+            >
+              Email
+            </Text>
+
+            <TextInput
+              placeholder="you@example.com"
+              keyboardType="email-address"
+              style={{
+                borderWidth: 1,
+                borderColor: "#ddd",
+                borderRadius: 20,
+                color: "black",
+                padding: 15,
+              }}
+
+              onChangeText={(value) => setEmail(value)}
+            />
+          </View>
+
+          {/* Password */}
+          <View style={{ marginTop: 20 }}>
+            <Text
+              style={{
+                marginBottom: 8,
+                fontFamily: "outfitBold",
+                fontSize: 17,
+              }}
+            >
+              Password
+            </Text>
+
+            <TextInput
+              placeholder="Enter your password"
+              secureTextEntry
+              style={{
+                borderWidth: 1,
+                color: "black",
+                borderRadius: 20,
+                borderColor: "#ddd",
+                padding: 15,
+              }}
+              onChangeText={(value) => setPassword(value)}
+            />
+          </View>
+
+          {/* Sign In Button */}
+          <TouchableOpacity
             style={{
-              color: "#2b7fff",
-              fontFamily:"outfitBold",
-              fontSize: 18 
+              backgroundColor: "#2b7fff",
+              padding: 16,
+              borderRadius: 50,
+              marginTop: 30,
+              alignItems: "center",
+
+            }}
+
+            onPress={SignIn}
+          >
+            <Text
+              style={{
+                color: "#fff",
+                fontSize: 20,
+                fontFamily: "outfitExtraBold"
+              }}
+            >
+              Sign In
+            </Text>
+          </TouchableOpacity>
+
+          {/* Divider */}
+
+
+
+          {/* Bottom */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              marginTop: "auto",
+              marginBottom: 20,
             }}
           >
-            {" "}
-            Sign Up
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <Text style={{ color: "gray", fontFamily: "outfitBold", fontSize: 18 }}>
+              Don't have an account?
+            </Text>
+
+            <TouchableOpacity onPress={() => router.push('/auth/signUp')}>
+              <Text
+                style={{
+                  color: "#2b7fff",
+                  fontFamily: "outfitBold",
+                  fontSize: 18
+                }}
+              >
+                {" "}
+                Sign Up
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

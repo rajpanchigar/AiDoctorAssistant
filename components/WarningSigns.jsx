@@ -51,7 +51,7 @@ export default function WarningSigns() {
           </View>
 
           <View style={styles.textContainer}>
-            <Text style={styles.warningText}>
+            <Text style={styles.warningText} numberOfLines={2}>
               {warning}
             </Text>
             <Text style={styles.subtitle}>
@@ -94,27 +94,28 @@ const styles = StyleSheet.create({
   },
 
   warningCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FEF2F2",
-    borderWidth: 1,
-    borderColor: "#FECACA",
-    borderRadius: 16,
-    padding: 15,
-    marginBottom: 12,
-  },
-
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#FEF2F2",
+  borderWidth: 1,
+  borderColor: "#FECACA",
+  borderRadius: 16,
+  padding: 15,
+  marginBottom: 12,
+  // remove overflow: "hidden" and width: "auto" — not needed
+},
   warningText: {
-    flex: 1,
-    fontSize: 16,
-    fontFamily: "outfitMedium",
-    color: "#7F1D1D",
-    width: 250,
-  },
+  fontSize: 15,
+  fontFamily: "outfitMedium",
+  color: "#7F1D1D",
+  flexWrap: "wrap",
+  // no flex:1 needed here since parent textContainer already has flex:1
+},
   header: {
   flexDirection: "row",
   alignItems: "center",
   marginBottom: 20,
+  flex: "wrap"
 },
 
 iconContainer: {
@@ -128,15 +129,15 @@ iconContainer: {
 
 textContainer: {
   flex: 1,
+  minWidth: 0,        // <-- critical: allows flex child to shrink below content width
   marginLeft: 14,
   marginRight: 10,
 },
-
 subtitle: {
   marginTop: 4,
   fontSize: 13,
   fontFamily: "outfitRegular",
   color: "#7f7f7f",
-  width: 200,
+  flexWrap: "wrap",
 },
 });

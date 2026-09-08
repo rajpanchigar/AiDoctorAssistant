@@ -4,7 +4,8 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity
+  TouchableOpacity,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -12,7 +13,7 @@ import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import CommonHealthTips from "../../components/CommonHealthTips";
 import { db } from "../../configs/FirebaseConfigs";
-import { collection, query, where, getDocs, orderBy, QuerySnapshot } from "firebase/firestore"
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -25,33 +26,25 @@ export default function Home() {
         const data = await AsyncStorage.getItem("user");
 
         if (data) {
-          setUser(JSON.parse(data));
-
           const currentUser = JSON.parse(data);
-          console.log(currentUser);
-          console.log(currentUser.uid);
+          setUser(currentUser);
 
           const q = query(
             collection(db, "user_diagnoses"),
-            where("userId", "==", currentUser.uid));
+            where("userId", "==", currentUser.uid)
+          );
 
           const result = await getDocs(q);
-
           const diagnosisList = [];
-
-          console.log(diagnosisList)
 
           result.forEach((doc) => {
             diagnosisList.push({
               id: doc.id,
               ...doc.data(),
-            })
-          })
-
+            });
+          });
 
           setDiagonses(diagnosisList);
-          console.log(diagnosisList);
-
         } else {
           router.replace("/");
         }
@@ -79,29 +72,18 @@ export default function Home() {
 
           <View style={styles.detailsContainer}>
             <Text style={styles.greetingText}>Hello,</Text>
-            <Text style={styles.nameText}>
-              {user?.fullName ?? "Loading..."}
-            </Text>
-            <Text style={styles.emailText}>
-              {user?.email ?? "Loading..."}
-            </Text>
+            <Text style={styles.nameText}>{user?.fullName ?? "Loading..."}</Text>
+            <Text style={styles.emailText}>{user?.email ?? "Loading..."}</Text>
           </View>
         </View>
 
         {/* AI Card */}
         <View style={styles.healthCard}>
           <View style={styles.stethoscope}>
-            <MaterialCommunityIcons
-              name="stethoscope"
-              size={22}
-              color="#fff"
-              key="stethoscope-icon"
-            />
+            <MaterialCommunityIcons name="stethoscope" size={22} color="#fff" />
           </View>
 
-          <Text style={styles.boxText}>
-            Describe How You Feel Today ??
-          </Text>
+          <Text style={styles.boxText}>Describe How You Feel Today ??</Text>
 
           <Text style={styles.boxDescription}>
             Enter your symptoms and get AI-powered guidance instantly.
@@ -112,8 +94,7 @@ export default function Home() {
         <View style={styles.common}>
           <View style={styles.commonHeader}>
             <Text style={styles.commonText}>Common Health Tips</Text>
-            <TouchableOpacity onPress={() => router.push('/AllCommonHealthTips')}>
-
+            <TouchableOpacity onPress={() => router.push("/AllCommonHealthTips")}>
               <Text style={styles.seeAll}>See All</Text>
             </TouchableOpacity>
           </View>
@@ -121,36 +102,34 @@ export default function Home() {
           <CommonHealthTips />
         </View>
 
+        {/* Recent Diagnoses */}
         <View style={styles.recent}>
           <View style={styles.recentHeader}>
             <Text style={styles.commonText}>Recent Diagnoses</Text>
-            <TouchableOpacity onPress={()=> router.push('/profile')}>
+            <TouchableOpacity onPress={() => router.push("/profile")}>
               <Text style={styles.viewAll}>View All</Text>
-
             </TouchableOpacity>
-
           </View>
 
-          {diagonses.slice(0,2).map((item) => (
-            <TouchableOpacity key={item.id} style={styles.diagnosisCard} onPress={() => router.push({
-              pathname: '/CurrentDiagnosisDetails',
-              params: {
-                id: item.id
+          {diagonses.slice(0, 2).map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.diagnosisCard}
+              onPress={() =>
+                router.push({
+                  pathname: "/CurrentDiagnosisDetails",
+                  params: { id: item.id },
+                })
               }
-            })}>
+            >
               <View style={styles.iconBox}>
-                <MaterialCommunityIcons
-                  name="stethoscope"
-                  size={26}
-                  color="#3B82F6"
-                />
+                <MaterialCommunityIcons name="stethoscope" size={26} color="#3B82F6" />
               </View>
 
               <View style={styles.cardContent}>
                 <Text style={styles.diseaseName}>
                   {item?.diagnosis?.diagnosisTitle}
                 </Text>
-
                 <Text style={styles.dateText}>
                   {item.createdAt?.toDate().toLocaleDateString("en-US", {
                     month: "short",
@@ -160,53 +139,53 @@ export default function Home() {
                 </Text>
               </View>
 
-              <MaterialCommunityIcons
-                name="chevron-right"
-                size={28}
-                color="#9CA3AF"
-              />
+              <MaterialCommunityIcons name="chevron-right" size={28} color="#9CA3AF" />
             </TouchableOpacity>
           ))}
         </View>
-
-
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  icon: {
-    marginTop: 10,
-
-
-  },
-
-  diagnosisCard: {
-    margin: 15,
-    backgroundColor: "white",
-    padding: 15,
-    borderRadius: 20,
+// Reusable platform-specific shadow generator
+const cardShadow = Platform.select({
+  ios: {
     shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 10,
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
+    shadowOffset: { width: 0, height: 5 },
   },
-  diseaseName: {
-    fontFamily: "outfitSemiBold",
-    fontSize: 15,
-    marginLeft: 40,
-    marginTop: -20,
+  android: {
+    elevation: 5,
+  },
+  default: {
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+  },
+});
 
+const smallCardShadow = Platform.select({
+  ios: {
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
   },
-  dateText: {
-    fontFamily: "outfitRegular",
-    marginLeft: 40,
+  android: {
+    elevation: 4,
   },
+  default: {
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+});
 
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8FAFC",
@@ -224,14 +203,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     padding: 20,
     borderRadius: 20,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
+    ...cardShadow,
   },
 
   logoWrapper: {
@@ -309,11 +281,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
 
-  recent: {
-    margin: 20,
-
-  },
-
   commonHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -322,7 +289,7 @@ const styles = StyleSheet.create({
   },
 
   commonText: {
-    fontSize: 22,
+    fontSize: 24,
     fontFamily: "outfitBold",
     color: "#111827",
   },
@@ -331,12 +298,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "outfitSemiBold",
     color: "#3B82F6",
-  },
-  viewAll:{
-    fontSize: 16,
-    fontFamily: "outfitSemiBold",
-    color: "#3B82F6",
-
   },
 
   recent: {
@@ -349,12 +310,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 15,
-  },
-
-  commonText: {
-    fontSize: 24,
-    fontFamily: "outfitBold",
-    color: "#111827",
   },
 
   viewAll: {
@@ -370,16 +325,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 16,
     marginBottom: 14,
-
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-
-    elevation: 4,
+    ...smallCardShadow,
   },
 
   iconBox: {
